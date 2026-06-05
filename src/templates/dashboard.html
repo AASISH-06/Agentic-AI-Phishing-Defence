@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic AI Phishing Defence Dashboard</title>
+
+  <style>
+    /* ===== General Styling ===== */
+    body {
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at top left, #0f172a, #1e293b);
+      color: #e2e8f0;
+      margin: 0;
+      padding: 40px;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+      font-size: 2.4rem;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(56,189,248,0.5);
+      animation: glow 2.5s ease-in-out infinite alternate;
+    }
+
+    /* ===== Live Refresh Indicator ===== */
+    .refresh-status {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 1rem;
+      color: #94a3b8;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e, 0 0 20px #22c55e;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.3);
+        opacity: 0.7;
+      }
+    }
+
+    /* ===== Table Section ===== */
+    h3 {
+      color: #f1f5f9;
+      margin-top: 60px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(99,102,241,0.5);
+    }
+
+    .table-container {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 25px;
+      margin-top: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      transform-style: preserve-3d;
+      transition: all 0.4s ease;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    .table-container:hover {
+      transform: perspective(800px) rotateX(2deg) rotateY(-2deg);
+      box-shadow: 0 25px 60px rgba(56,189,248,0.3);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      color: #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 14px 18px;
+      text-align: left;
+    }
+
+    th {
+      background: linear-gradient(90deg, #2563eb, #06b6d4);
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      text-transform: uppercase;
+    }
+
+    tr:nth-child(even) {
+      background: rgba(255,255,255,0.05);
+    }
+
+    tr:hover {
+      background: rgba(56,189,248,0.1);
+      transform: scale(1.01);
+      transition: all 0.3s ease;
+    }
+
+    td {
+      font-size: 0.95rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* ===== Risk Score Colors ===== */
+    .high {
+      color: #ef4444;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(239,68,68,0.6);
+    }
+
+    .medium {
+      color: #facc15;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(250,204,21,0.5);
+    }
+
+    .low {
+      color: #22c55e;
+      font-weight: bold;
+      text-shadow: 0 0 10px rgba(34,197,94,0.5);
+    }
+
+    footer {
+      margin-top: 60px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      text-shadow: 0 0 10px rgba(148,163,184,0.3);
+    }
+
+    footer span {
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+    }
+
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px #38bdf8, 0 0 20px #38bdf8; }
+      50% { text-shadow: 0 0 25px #818cf8, 0 0 45px #818cf8; }
+    }
+
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #06b6d4, #3b82f6);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+  </style>
+</head>
+
+<body>
+  <h1>🧠 Agentic AI Phishing Defence Dashboard</h1>
+
+  <div class="refresh-status">
+    <span class="status-dot"></span>
+    <span id="last-updated">Last Updated: Just now</span>
+  </div>
+
+  <!-- Gmail Logs Section -->
+  <h3>📧 Gmail Logs</h3>
+  <div class="table-container" id="gmail-logs">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Platform</th>
+          <th>Sender</th>
+          <th>Subject</th>
+          <th>Message</th>
+          <th>Risk Score</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in scans %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
+          <td>{{ row[3] }}</td>
+          <td>{{ row[4][:100] }}...</td>
+          <td class="{% if row[5] >= 70 %}high{% elif row[5] >= 40 %}medium{% else %}low{% endif %}">
+            {{ row[5] }}
+          </td>
+          <td>{{ row[6] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- WhatsApp Logs Section -->
+  <h3>💬 WhatsApp & SMS Logs</h3>
+  <div class="table-container" id="sms-logs">
+    <table>
+      <thead>
+        <tr>
+          <th>Sender</th>
+          <th>Message</th>
+          <th>Risk Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in sms_logs %}
+        <tr>
+          <td>{{ log.sender }}</td>
+          <td>{{ log.message }}</td>
+          <td class="{% if log.risk >= 70 %}high{% elif log.risk >= 40 %}medium{% else %}low{% endif %}">
+            {{ log.risk }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    ⛑️ <span>Agentic AI Phishing Defence System</span> — Monitoring Gmail, WhatsApp & SMS in Real Time
+  </footer>
+
+  <!-- ===== JavaScript for Auto Refresh ===== -->
+  <script>
+    let lastUpdated = document.getElementById("last-updated");
+    let seconds = 0;
+
+    function updateTimer() {
+      seconds += 1;
+      if (seconds === 1) {
+        lastUpdated.textContent = "Last Updated: Just now";
+      } else {
+        lastUpdated.textContent = `Last Updated: ${seconds} seconds ago`;
+      }
+    }
+
+    function refreshDashboard() {
+      fetch(window.location.href)
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById("gmail-logs").innerHTML =
+            new DOMParser().parseFromString(html, "text/html").getElementById("gmail-logs").innerHTML;
+          document.getElementById("sms-logs").innerHTML =
+            new DOMParser().parseFromString(html, "text/html").getElementById("sms-logs").innerHTML;
+
+          seconds = 0; // reset timer
+          document.querySelectorAll(".table-container").forEach(e => {
+            e.style.animation = "none";
+            e.offsetHeight;
+            e.style.animation = "fadeIn 1s ease forwards";
+          });
+        })
+        .catch(err => console.error("❌ Refresh failed:", err));
+    }
+
+    setInterval(updateTimer, 1000);
+    setInterval(refreshDashboard, 10000);
+  </script>
+</body>
+</html>
